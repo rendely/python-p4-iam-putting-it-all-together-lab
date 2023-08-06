@@ -20,6 +20,7 @@ class Signup(Resource):
         try:    
             db.session.add(new_user)
             db.session.commit()
+            session['user_id'] = new_user.id
             return new_user.to_dict(), 201
         except IntegrityError:
             return {'error': '422'}, 422
@@ -28,11 +29,11 @@ class Signup(Resource):
 
 class CheckSession(Resource):
     def get(self):
-        if session['user_id']:
+        if not session.get('user_id'):
+            return {'error': '401'}, 401
+        else:
             user = User.query.filter_by(id = session.get('user_id')).first()
             return user.to_dict(), 200
-        else:
-            return {'error': '401'}, 401
 
 
 class Login(Resource):
